@@ -6,17 +6,17 @@
     <meta name="viewport" id="metaViewport" content="user-scalable=no, initial-scale=1, width=device-width, viewport-fit=cover" data-tdv-general-scale="0.5"/>
     <meta name="apple-mobile-web-app-capable" content="yes"/>
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <script src="lib/tdvplayer.js?v=1778932576694"></script>
-    <link rel="preload" href="locale/es.txt?v=1778932576694" as="fetch" crossorigin="anonymous"/>
-	<link rel="preload" href="script.js?v=1778932576694" as="script"/>
-	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/l/3/0_0.webp?v=1778932576694" as="image"/>
-	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/r/3/0_0.webp?v=1778932576694" as="image"/>
-	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/d/3/0_0.webp?v=1778932576694" as="image"/>
-	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/f/3/0_0.webp?v=1778932576694" as="image"/>
-	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/b/3/0_0.webp?v=1778932576694" as="image"/>
+    <script src="lib/tdvplayer.js?v=1778933792468"></script>
+    <link rel="preload" href="locale/es.txt?v=1778933792468" as="fetch" crossorigin="anonymous"/>
+	<link rel="preload" href="script.js?v=1778933792468" as="script"/>
+	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/l/3/0_0.webp?v=1778933792468" as="image"/>
+	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/r/3/0_0.webp?v=1778933792468" as="image"/>
+	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/d/3/0_0.webp?v=1778933792468" as="image"/>
+	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/f/3/0_0.webp?v=1778933792468" as="image"/>
+	<link rel="preload" href="media/panorama_0F1F8CEF_1EB1_A66A_41A5_71F94F88735E_0/b/3/0_0.webp?v=1778933792468" as="image"/>
 	<meta name="description" content="Virtual Tour"/>
 	<meta name="theme-color" content="#FFFFFF"/>
-    <script src="script.js?v=1778932576694"></script>
+    <script src="script.js?v=1778933792468"></script>
     <style type="text/css">
         html, body { height:100%; width:100%; height:100vh; width:100vw; margin:0; padding:0; overflow:hidden; }
         .fill-viewport { position:fixed; top:0; left:0; right:0; bottom:0; padding:0; margin:0; overflow: hidden; }
@@ -25,12 +25,11 @@
         #viewer { z-index:1; }
         #preloadContainer { z-index:2; opacity:0; background-color:rgba(255,255,255,1); transition: opacity 0.5s; -webkit-transition: opacity 0.5s; -moz-transition: opacity 0.5s; -o-transition: opacity 0.5s;}
     </style>
-    <link rel="stylesheet" href="fonts.css?v=1778932576694">
+    <link rel="stylesheet" href="fonts.css?v=1778933792468">
 </head>
 <body>
     <div id="preloadContainer" class="fill-viewport"><div style="z-index: 4; position: absolute; overflow: hidden; left: 0%; top: 50%; width: 100.00%; height: 10.00%" ><div style="text-align:left; color:#000; "><DIV STYLE="text-align:center;font-size:1.6666666666666663vmin;"><SPAN STYLE="display:inline-block; letter-spacing:0vmin; white-space:pre-wrap;color:#777777;font-size:1.67vmin;font-family:Arial, Helvetica, sans-serif;">Loading virtual tour. Please wait...</SPAN></DIV></div></div></div>
     <div id="viewer" class="fill-viewport"></div>
-
 <script>
 const URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/1Iffh-VbZUFFYpI5sVI8HQAz6IPgACs_W2sq0iEH4iVo/export?format=csv";
 
@@ -44,11 +43,8 @@ function inicializarControlInventario() {
         filas.forEach(fila => {
             let columnas = fila.split(",");
             if(columnas.length >= 2) {
-                // Limpiamos nombres (quita espacios, guiones y mayúsculas)
                 let nombreExcel = columnas[0].trim().toLowerCase().replace(/[\s_-]/g, "");
-                // Limpiamos el estado
                 let estadoExcel = columnas[1].trim().toLowerCase();
-                
                 if (nombreExcel) {
                     mapeo_lotes[nombreExcel] = estadoExcel;
                 }
@@ -79,15 +75,15 @@ function inicializarControlInventario() {
                                         if (mapeo_lotes[nombreHotspotLimpio]) {
                                             let estado = mapeo_lotes[nombreHotspotLimpio];
                                             
-                                            // ROJO: Si dice "vendido" o si dice "rojo"
+                                            // Si en Excel dice "vendido" o "rojo"
                                             if (estado.includes("vend") || estado.includes("roj")) {
-                                                hotspot.set("fillColor", "#FF0000"); 
+                                                hotspot.set("fillColor", "#FF0000"); // Rojo
                                                 hotspot.set("lineColor", "#FF0000");
                                                 hotspot.set("fillOpacity", 0.6);
                                             } 
-                                            // VERDE: Si dice "disp" o si dice "verd"
+                                            // Si en Excel dice "disponible" o "verde"
                                             else if (estado.includes("disp") || estado.includes("verd")) {
-                                                hotspot.set("fillColor", "#00FF00"); 
+                                                hotspot.set("fillColor", "#00FF00"); // Verde
                                                 hotspot.set("lineColor", "#00FF00");
                                                 hotspot.set("fillOpacity", 0.6);
                                             }
@@ -101,7 +97,6 @@ function inicializarControlInventario() {
                         }
                     });
 
-                    // Cuando detecta y pinta los lotes, frena el bucle para no gastar datos
                     if (seAplicaronCambios || intentos > 40) {
                         clearInterval(verificadorHotspots);
                     }
@@ -109,7 +104,7 @@ function inicializarControlInventario() {
             }
         }, 500);
     })
-    .catch(error => console.error('Error en inventario:', error));
+    .catch(error => console.error('Error de conexión:', error));
 }
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
