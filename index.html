@@ -34,7 +34,6 @@
 <script>
 const URL_GOOGLE_SHEETS = "https://docs.google.com/spreadsheets/d/1Iffh-VbZUFFYpI5sVI8HQAz6IPgACs_W2sq0iEH4iVo/export?format=csv";
 
-// Función principal que descarga y aplica los colores
 function inicializarControlInventario() {
     fetch(URL_GOOGLE_SHEETS)
     .then(response => response.text())
@@ -45,13 +44,17 @@ function inicializarControlInventario() {
         filas.forEach(fila => {
             let columnas = fila.split(",");
             if(columnas.length >= 2) {
-                let nombreNormalizado = columnas[0].trim().toLowerCase().replace(/[\s_]/g, "");
-                let estado = columnas[1].trim().toLowerCase();
-                mapeo_lotes[nombreNormalizado] = estado;
+                // Limpiamos nombres (quita espacios, guiones y mayúsculas)
+                let nombreExcel = columnas[0].trim().toLowerCase().replace(/[\s_-]/g, "");
+                // Limpiamos el estado
+                let estadoExcel = columnas[1].trim().toLowerCase();
+                
+                if (nombreExcel) {
+                    mapeo_lotes[nombreExcel] = estadoExcel;
+                }
             }
         });
 
-        // Bucle inteligente: Revisa constantemente hasta que 3DVista termine de crear los elementos visuales
         let intentos = 0;
         let verificadorHotspots = setInterval(() => {
             intentos++;
@@ -69,21 +72,26 @@ function inicializarControlInventario() {
                             if (hotspots && hotspots.length > 0) {
                                 hotspots.forEach(hotspot => {
                                     let nombreHotspot = hotspot.get("name");
+                                    
                                     if (nombreHotspot) {
-                                        let nombreHotspotNormalizado = nombreHotspot.toLowerCase().replace(/[\s_]/g, "");
+                                        let nombreHotspotLimpio = nombreHotspot.toLowerCase().replace(/[\s_-]/g, "");
                                         
-                                        if (mapeo_lotes[nombreHotspotNormalizado]) {
-                                            let estado = mapeo_lotes[nombreHotspotNormalizado];
+                                        if (mapeo_lotes[nombreHotspotLimpio]) {
+                                            let estado = mapeo_lotes[nombreHotspotLimpio];
                                             
-                                            if (estado === "vendido") {
-                                                hotspot.set("fillColor", "#FF0000"); // Rojo
+                                            // ROJO: Si dice "vendido" o si dice "rojo"
+                                            if (estado.includes("vend") || estado.includes("roj")) {
+                                                hotspot.set("fillColor", "#FF0000"); 
                                                 hotspot.set("lineColor", "#FF0000");
                                                 hotspot.set("fillOpacity", 0.6);
-                                            } else if (estado === "disponible") {
-                                                hotspot.set("fillColor", "#00FF00"); // Verde
+                                            } 
+                                            // VERDE: Si dice "disp" o si dice "verd"
+                                            else if (estado.includes("disp") || estado.includes("verd")) {
+                                                hotspot.set("fillColor", "#00FF00"); 
                                                 hotspot.set("lineColor", "#00FF00");
                                                 hotspot.set("fillOpacity", 0.6);
                                             }
+                                            
                                             if (typeof hotspot.update === "function") hotspot.update();
                                             seAplicaronCambios = true;
                                         }
@@ -93,18 +101,17 @@ function inicializarControlInventario() {
                         }
                     });
 
-                    // Si ya encontramos y pintamos los hotspots, detenemos el bucle para liberar memoria
-                    if (seAplicaronCambios || intentos > 30) {
+                    // Cuando detecta y pinta los lotes, frena el bucle para no gastar datos
+                    if (seAplicaronCambios || intentos > 40) {
                         clearInterval(verificadorHotspots);
                     }
                 }
             }
-        }, 500); // Revisa cada 500 milisegundos hasta tener éxito
+        }, 500);
     })
-    .catch(error => console.error('Error al conectar con el inventario de Google Sheets:', error));
+    .catch(error => console.error('Error en inventario:', error));
 }
 
-// Ejecutamos la función asegurándonos de que no falle sin importar la velocidad de carga de la red
 if (document.readyState === "complete" || document.readyState === "interactive") {
     inicializarControlInventario();
 } else {
